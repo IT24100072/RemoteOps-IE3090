@@ -22,6 +22,27 @@ typedef struct {
     volatile int running;
 } monitor_context_t;
 
+#define LOG_FILE "/home/tasa/remoteops/remoteops_072.log"
+pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void write_log(const char *event)
+{
+    FILE *fp;
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char timestamp[64];
+
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    pthread_mutex_lock(&log_mutex);
+    fp = fopen(LOG_FILE, "a");
+    if (fp != NULL) {
+        fprintf(fp, "[%s] %s SID:%s\n", timestamp, event, SID);
+        fclose(fp);
+    }
+    pthread_mutex_unlock(&log_mutex);
+}
+
 /* ---------- Utility Functions ---------- */
 
 void send_response(int client_fd, const char *message)
@@ -605,6 +626,7 @@ void *handle_client(void *arg)
         "Controller connected. Thread started.\n"
     );
 
+    write_log("CONTROLLER_CONNECTED");
     int authenticated = 0;
 
     monitor_context_t *monitor = NULL;
@@ -627,6 +649,7 @@ void *handle_client(void *arg)
             buffer
         );
 
+        { char log_event[BUFFER_SIZE]; snprintf(log_event, sizeof(log_event), "COMMAND %s", buffer); write_log(log_event); }
         /* AUTH */
         if (strncmp(buffer, "AUTH ", 5) == 0) {
 
@@ -710,6 +733,7 @@ void *handle_client(void *arg)
         /* PUT */
         else if (strncmp(buffer, "PUT ", 4) == 0) {
 
+            write_log("FILE_TRANSFER PUT");
             handle_put(
                 client_fd,
                 buffer
@@ -719,6 +743,7 @@ void *handle_client(void *arg)
         /* GET */
         else if (strncmp(buffer, "GET ", 4) == 0) {
 
+            write_log("FILE_TRANSFER GET");
             handle_get(
                 client_fd,
                 buffer

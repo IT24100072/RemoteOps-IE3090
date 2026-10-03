@@ -9,3 +9,10 @@ controller_3.log
 controller_4.log
 controller_5.log
 *.o
+
+agent_072_before_logging.c
+remoteops_072.log
+agentfiles/
+test_upload.txt
+test_invalid.c
+test_put.c
