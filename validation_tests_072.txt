@@ -6,3 +6,6 @@ Graceful QUIT/disconnect: PASS
 Connection/command logging: PASS
 UDP MONITOR START/STOP: PASS
 PUT/GET byte-for-byte verification: PASS
+Five simultaneous Controllers: PASS
+Clean build with Makefile_072: PASS
+PUT/GET transfer throughput logging: PASS
