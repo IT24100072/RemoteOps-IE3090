@@ -324,6 +324,8 @@ void handle_put(int client_fd, const char *input)
         "OK READY_FOR_DATA SID:2700\n"
     );
 
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
     char buffer[BUFFER_SIZE];
     long remaining = file_size;
 
@@ -342,6 +344,12 @@ void handle_put(int client_fd, const char *input)
         remaining -= chunk;
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    double elapsed = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+    double throughput = elapsed > 0.0 ? (double)file_size / elapsed : 0.0;
+    char transfer_log[BUFFER_SIZE];
+    snprintf(transfer_log, sizeof(transfer_log), "FILE_TRANSFER PUT BYTES:%ld RATE:%.2f_Bps", file_size, throughput);
+    write_log(transfer_log);
     fclose(fp);
 
     send_response(
@@ -400,6 +408,8 @@ void handle_get(int client_fd, const char *input)
 
     send_response(client_fd, response);
 
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
     char buffer[BUFFER_SIZE];
     size_t bytes_read;
 
@@ -409,6 +419,12 @@ void handle_get(int client_fd, const char *input)
             return;
         }
     }
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    double elapsed = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+    double throughput = elapsed > 0.0 ? (double)file_size / elapsed : 0.0;
+    char transfer_log[BUFFER_SIZE];
+    snprintf(transfer_log, sizeof(transfer_log), "FILE_TRANSFER GET BYTES:%ld RATE:%.2f_Bps", file_size, throughput);
+    write_log(transfer_log);
 
     fclose(fp);
 }
