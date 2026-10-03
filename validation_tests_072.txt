@@ -1,0 +1,8 @@
+RemoteOps Validation Tests
+==========================
+AUTH/command validation: PASS
+EXEC invalid command (EXEC ls): PASS
+Graceful QUIT/disconnect: PASS
+Connection/command logging: PASS
+UDP MONITOR START/STOP: PASS
+PUT/GET byte-for-byte verification: PASS
